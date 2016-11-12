@@ -255,8 +255,12 @@
 {
     CIImage *overlay = [CIImage imageWithColor:[CIColor colorWithRed:1 green:0 blue:0 alpha:0.6]];
     overlay = [overlay imageByCroppingToRect:image.extent];
-    overlay = [overlay imageByApplyingFilter:@"CIPerspectiveTransformWithExtent" withInputParameters:@{@"inputExtent":[CIVector vectorWithCGRect:image.extent],@"inputTopLeft":[CIVector vectorWithCGPoint:topLeft],@"inputTopRight":[CIVector vectorWithCGPoint:topRight],@"inputBottomLeft":[CIVector vectorWithCGPoint:bottomLeft],@"inputBottomRight":[CIVector vectorWithCGPoint:bottomRight]}];
-
+    overlay = [overlay imageByApplyingFilter:@"CIPerspectiveTransformWithExtent"
+                         withInputParameters:@{ @"inputExtent":[CIVector vectorWithCGRect:image.extent],
+                                                @"inputTopLeft":[CIVector vectorWithCGPoint:topLeft],
+                                                @"inputTopRight":[CIVector vectorWithCGPoint:topRight],
+                                                @"inputBottomLeft":[CIVector vectorWithCGPoint:bottomLeft],
+                                                @"inputBottomRight":[CIVector vectorWithCGPoint:bottomRight]}];
     return [overlay imageByCompositingOverImage:image];
 }
 
@@ -428,11 +432,10 @@
              UIImage *image = [UIImage imageWithCGImage:imgRef];
              CFRelease(imgRef);
 
-             dispatch_async(dispatch_get_main_queue(), ^
-                            {
-                                completionHandler(image);
-                                dispatch_resume(_captureQueue);
-                            });
+             [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+                 completionHandler(image);
+                 dispatch_resume(_captureQueue);
+             }];
 
              _imageDedectionConfidence = 0.0f;
          }
@@ -499,7 +502,10 @@
                       detector = [CIDetector detectorOfType:CIDetectorTypeRectangle
                                                     context:nil
                                                     options:@{ CIDetectorAccuracy : CIDetectorAccuracyLow,
-                                                               CIDetectorTracking : @(YES)}];
+                                                               CIDetectorTracking : @(YES),
+                                                               CIDetectorMinFeatureSize: @(0.5),
+                                                               CIDetectorNumberOfAngles: @(4)
+                                                               }];
                   });
     return detector;
 }
