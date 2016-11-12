@@ -37,6 +37,7 @@
 
 - (void)viewDidAppear:(BOOL)animated
 {
+    [super viewDidAppear:animated];
     [self.cameraViewController start];
 }
 
@@ -65,7 +66,7 @@
 
 - (void)focusIndicatorAnimateToPoint:(CGPoint)targetPoint
 {
-    [self.focusIndicator setCenter:targetPoint];
+    (self.focusIndicator).center = targetPoint;
     self.focusIndicator.alpha = 0.0;
     self.focusIndicator.hidden = NO;
     
@@ -92,7 +93,7 @@
 
 - (IBAction)filterToggle:(id)sender
 {
-    [self.cameraViewController setCameraViewType:(self.cameraViewController.cameraViewType == IPDFCameraViewTypeBlackAndWhite) ? IPDFCameraViewTypeNormal : IPDFCameraViewTypeBlackAndWhite];
+    (self.cameraViewController).cameraViewType = (self.cameraViewController.cameraViewType == IPDFCameraViewTypeBlackAndWhite) ? IPDFCameraViewTypeNormal : IPDFCameraViewTypeBlackAndWhite;
     [self updateTitleLabel];
 }
 

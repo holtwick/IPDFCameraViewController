@@ -105,7 +105,7 @@
     [self createGLKView];
 
     NSArray *possibleDevices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
-    AVCaptureDevice *device = [possibleDevices firstObject];
+    AVCaptureDevice *device = possibleDevices.firstObject;
     if (!device) return;
 
     _imageDedectionConfidence = 0.0;
@@ -122,26 +122,26 @@
 
     AVCaptureVideoDataOutput *dataOutput = [[AVCaptureVideoDataOutput alloc] init];
     [dataOutput setAlwaysDiscardsLateVideoFrames:YES];
-    [dataOutput setVideoSettings:@{(id)kCVPixelBufferPixelFormatTypeKey:@(kCVPixelFormatType_32BGRA)}];
+    dataOutput.videoSettings = @{(id)kCVPixelBufferPixelFormatTypeKey:@(kCVPixelFormatType_32BGRA)};
     [dataOutput setSampleBufferDelegate:self queue:_captureQueue];
     [session addOutput:dataOutput];
 
     self.stillImageOutput = [[AVCaptureStillImageOutput alloc] init];
     [session addOutput:self.stillImageOutput];
 
-    AVCaptureConnection *connection = [dataOutput.connections firstObject];
-    [connection setVideoOrientation:AVCaptureVideoOrientationPortrait];
+    AVCaptureConnection *connection = (dataOutput.connections).firstObject;
+    connection.videoOrientation = AVCaptureVideoOrientationPortrait;
 
     if (device.isFlashAvailable)
     {
         [device lockForConfiguration:nil];
-        [device setFlashMode:AVCaptureFlashModeOff];
+        device.flashMode = AVCaptureFlashModeOff;
         [device unlockForConfiguration];
 
         if ([device isFocusModeSupported:AVCaptureFocusModeContinuousAutoFocus])
         {
             [device lockForConfiguration:nil];
-            [device setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
+            device.focusMode = AVCaptureFocusModeContinuousAutoFocus;
             [device unlockForConfiguration];
         }
     }
@@ -294,16 +294,16 @@
     _enableTorch = enableTorch;
 
     AVCaptureDevice *device = self.captureDevice;
-    if ([device hasTorch] && [device hasFlash])
+    if (device.hasTorch && device.hasFlash)
     {
         [device lockForConfiguration:nil];
         if (enableTorch)
         {
-            [device setTorchMode:AVCaptureTorchModeOn];
+            device.torchMode = AVCaptureTorchModeOn;
         }
         else
         {
-            [device setTorchMode:AVCaptureTorchModeOff];
+            device.torchMode = AVCaptureTorchModeOff;
         }
         [device unlockForConfiguration];
     }
@@ -316,21 +316,21 @@
     CGSize frameSize = self.bounds.size;
     pointOfInterest = CGPointMake(point.y / frameSize.height, 1.f - (point.x / frameSize.width));
 
-    if ([device isFocusPointOfInterestSupported] && [device isFocusModeSupported:AVCaptureFocusModeAutoFocus])
+    if (device.focusPointOfInterestSupported && [device isFocusModeSupported:AVCaptureFocusModeAutoFocus])
     {
         NSError *error;
         if ([device lockForConfiguration:&error])
         {
             if ([device isFocusModeSupported:AVCaptureFocusModeContinuousAutoFocus])
             {
-                [device setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
-                [device setFocusPointOfInterest:pointOfInterest];
+                device.focusMode = AVCaptureFocusModeContinuousAutoFocus;
+                device.focusPointOfInterest = pointOfInterest;
             }
 
-            if([device isExposurePointOfInterestSupported] && [device isExposureModeSupported:AVCaptureExposureModeContinuousAutoExposure])
+            if(device.exposurePointOfInterestSupported && [device isExposureModeSupported:AVCaptureExposureModeContinuousAutoExposure])
             {
-                [device setExposurePointOfInterest:pointOfInterest];
-                [device setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
+                device.exposurePointOfInterest = pointOfInterest;
+                device.exposureMode = AVCaptureExposureModeContinuousAutoExposure;
                 completionHandler();
             }
 
@@ -350,9 +350,9 @@
     AVCaptureConnection *videoConnection = nil;
     for (AVCaptureConnection *connection in self.stillImageOutput.connections)
     {
-        for (AVCaptureInputPort *port in [connection inputPorts])
+        for (AVCaptureInputPort *port in connection.inputPorts)
         {
-            if ([[port mediaType] isEqual:AVMediaTypeVideo] )
+            if ([port.mediaType isEqual:AVMediaTypeVideo] )
             {
                 videoConnection = connection;
                 break;
@@ -400,7 +400,7 @@
              [transform setValue:enhancedImage forKey:kCIInputImageKey];
              NSValue *rotation = [NSValue valueWithCGAffineTransform:CGAffineTransformMakeRotation(-90 * (M_PI/180))];
              [transform setValue:rotation forKey:@"inputTransform"];
-             enhancedImage = [transform outputImage];
+             enhancedImage = transform.outputImage;
 
              if (!enhancedImage || CGRectIsEmpty(enhancedImage.extent)) return;
 
@@ -472,9 +472,9 @@
     return [CIFilter filterWithName:@"CIColorControls"
                       keysAndValues:
             kCIInputImageKey, image,
-            @"inputBrightness", [NSNumber numberWithFloat:0.0],
-            @"inputContrast", [NSNumber numberWithFloat:1.14],
-            @"inputSaturation", [NSNumber numberWithFloat:0.0],
+            @"inputBrightness", @0.0f,
+            @"inputContrast", @1.14f,
+            @"inputSaturation", @0.0f,
             nil].outputImage;
 }
 
@@ -525,13 +525,13 @@
 
 - (CIRectangleFeature *)_biggestRectangleInRectangles:(NSArray *)rectangles
 {
-    if (![rectangles count]) {
+    if (!rectangles.count) {
         return nil;
     }
 
     float halfPerimiterValue = 0;
 
-    CIRectangleFeature *biggestRectangle = [rectangles firstObject];
+    CIRectangleFeature *biggestRectangle = rectangles.firstObject;
 
     for (CIRectangleFeature *rect in rectangles)
     {
@@ -574,7 +574,7 @@
     CGPoint max = min;
     for (NSValue *value in points)
     {
-        CGPoint point = [value CGPointValue];
+        CGPoint point = value.CGPointValue;
         min.x = fminf(point.x, min.x);
         min.y = fminf(point.y, min.y);
         max.x = fmaxf(point.x, max.x);
@@ -589,7 +589,7 @@
 
     NSNumber *(^angleFromPoint)(id) = ^(NSValue *value)
     {
-        CGPoint point = [value CGPointValue];
+        CGPoint point = value.CGPointValue;
         CGFloat theta = atan2f(point.y - center.y, point.x - center.x);
         CGFloat angle = fmodf(M_PI - M_PI_4 + theta, 2 * M_PI);
         return @(angle);
