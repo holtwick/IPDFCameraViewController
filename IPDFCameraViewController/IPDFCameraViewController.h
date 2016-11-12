@@ -9,8 +9,7 @@
 
 #import <UIKit/UIKit.h>
 
-typedef NS_ENUM(NSInteger,IPDFCameraViewType)
-{
+typedef NS_ENUM(NSInteger,IPDFCameraViewType) {
     IPDFCameraViewTypeBlackAndWhite,
     IPDFCameraViewTypeNormal
 };
