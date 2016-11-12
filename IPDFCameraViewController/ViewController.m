@@ -130,9 +130,9 @@
 {
     __weak typeof(self) weakSelf = self;
     
-    [self.cameraViewController captureImageWithCompletionHander:^(NSString *imageFilePath)
+    [self.cameraViewController captureImageWithCompletionHander:^(UIImage *image)
     {
-        UIImageView *captureImageView = [[UIImageView alloc] initWithImage:[UIImage imageWithContentsOfFile:imageFilePath]];
+        UIImageView *captureImageView = [[UIImageView alloc] initWithImage:image];
         captureImageView.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.7];
         captureImageView.frame = CGRectOffset(weakSelf.view.bounds, 0, -weakSelf.view.bounds.size.height);
         captureImageView.alpha = 1.0;

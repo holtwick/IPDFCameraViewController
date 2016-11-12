@@ -339,7 +339,7 @@
     }
 }
 
-- (void)captureImageWithCompletionHander:(void(^)(NSString *imageFilePath))completionHandler
+- (void)captureImageWithCompletionHander:(void(^)(UIImage *image))completionHandler
 {
     dispatch_suspend(_captureQueue);
     
@@ -366,9 +366,7 @@
              dispatch_resume(_captureQueue);
              return;
          }
-         
-         __block NSString *filePath = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"ipdf_img_%i.jpeg",(int)[NSDate date].timeIntervalSince1970]];
-         
+
          @autoreleasepool
          {
              NSData *imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageSampleBuffer];
@@ -426,18 +424,13 @@
              CGColorSpaceRelease(colorSpace);
              CGContextRelease(bitmapContext);
              free(byteBuffer);
-             
-             if (imgRef == NULL)
-             {
-                 CFRelease(imgRef);
-                 return;
-             }
-             saveCGImageAsJPEGToFilePath(imgRef, filePath);
+
+             UIImage *image = [UIImage imageWithCGImage:imgRef];
              CFRelease(imgRef);
              
              dispatch_async(dispatch_get_main_queue(), ^
              {
-                completionHandler(filePath);
+                completionHandler(image);
                 dispatch_resume(_captureQueue);
              });
              
@@ -446,17 +439,17 @@
      }];
 }
 
-void saveCGImageAsJPEGToFilePath(CGImageRef imageRef, NSString *filePath)
-{
-    @autoreleasepool
-    {
-        CFURLRef url = (__bridge CFURLRef)[NSURL fileURLWithPath:filePath];
-        CGImageDestinationRef destination = CGImageDestinationCreateWithURL(url, kUTTypeJPEG, 1, NULL);
-        CGImageDestinationAddImage(destination, imageRef, nil);
-        CGImageDestinationFinalize(destination);
-        CFRelease(destination);
-    }
-}
+//void saveCGImageAsJPEGToFilePath(CGImageRef imageRef, NSString *filePath)
+//{
+//    @autoreleasepool
+//    {
+//        CFURLRef url = (__bridge CFURLRef)[NSURL fileURLWithPath:filePath];
+//        CGImageDestinationRef destination = CGImageDestinationCreateWithURL(url, kUTTypeJPEG, 1, NULL);
+//        CGImageDestinationAddImage(destination, imageRef, nil);
+//        CGImageDestinationFinalize(destination);
+//        CFRelease(destination);
+//    }
+//}
 
 - (void)hideGLKView:(BOOL)hidden completion:(void(^)())completion
 {
