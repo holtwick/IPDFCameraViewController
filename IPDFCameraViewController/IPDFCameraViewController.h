@@ -4,6 +4,7 @@
 //
 //  Created by Maximilian Mackh on 06/01/15.
 //  Copyright (c) 2015 mackh ag. All rights reserved.
+//  Modified by Dirk Holtwick.
 //
 
 #import <UIKit/UIKit.h>
