@@ -266,8 +266,11 @@
     
     [self.captureSession startRunning];
     
-    _borderDetectTimeKeeper = [NSTimer scheduledTimerWithTimeInterval:0.5 target:self selector:@selector(enableBorderDetectFrame) userInfo:nil repeats:YES];
-    
+    _borderDetectTimeKeeper = [NSTimer scheduledTimerWithTimeInterval:(1./5.)
+                                                               target:self
+                                                             selector:@selector(enableBorderDetectFrame)
+                                                             userInfo:nil
+                                                              repeats:YES];
     [self hideGLKView:NO completion:nil];
 }
 
